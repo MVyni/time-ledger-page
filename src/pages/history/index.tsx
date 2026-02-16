@@ -17,22 +17,27 @@ export function HistoryPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="w-full md:max-w-xl lg:max-w-2xl mx-auto">
+      <div className="w-full flex-1 flex flex-col">
         <DashboardHeader />
-        <main className="w-full px-6 py-8">
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Lock size={48} className="mb-4 text-slate-600" />
-            <h2 className="text-xl font-semibold text-slate-300">Histórico Privado</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Faça login para acessar seu histórico completo.
-            </p>
-            <Button
-              onClick={() => navigate('/login')}
-              className="mt-6 w-full sm:w-auto"
-              size="lg"
-            >
-              Fazer Login
-            </Button>
+        <main
+          className="w-full flex-1 pt-8 pb-24 flex justify-center"
+          style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        >
+          <div className="w-full max-w-3xl px-4 sm:px-6">
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Lock size={48} className="mb-4 text-slate-600" />
+              <h2 className="text-xl font-semibold text-slate-300">Histórico Privado</h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Faça login para acessar seu histórico completo.
+              </p>
+              <Button
+                onClick={() => navigate('/login')}
+                className="mt-6 w-full sm:w-auto"
+                size="lg"
+              >
+                Fazer Login
+              </Button>
+            </div>
           </div>
         </main>
       </div>
@@ -40,59 +45,64 @@ export function HistoryPage() {
   }
 
   return (
-    <div className="w-full md:max-w-xl lg:max-w-2xl mx-auto">
+    <div className="w-full flex-1 flex flex-col">
       <DashboardHeader />
 
-      <main className="w-full px-6 py-8">
-      {/* Header */}
-      <div className="mb-6 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold text-slate-200">Histórico</h1>
-            <p className="text-xs text-slate-500">Resumo mensal dos seus registros</p>
+      <main
+        className="w-full flex-1 pt-8 pb-24 flex justify-center"
+        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+      >
+        <div className="w-full max-w-3xl px-4 sm:px-6">
+          {/* Header */}
+          <div className="!mb-4 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-lg font-bold text-slate-200">Histórico</h1>
+              <p className="text-xs text-slate-500">Resumo mensal dos seus registros</p>
+            </div>
           </div>
-      </div>
 
-        {/* List */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
-          </div>
-        ) : history.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
-            <CalendarDays size={48} className="mb-4 text-slate-600" />
-            <p className="text-sm font-medium">Nenhum histórico encontrado</p>
-            <p className="mt-1 text-xs text-slate-600">
-              Comece adicionando seus primeiros registros
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {history
-              .sort((a, b) => {
-                if (a.year !== b.year) return b.year - a.year
-                return b.month - a.month
-              })
-              .map((item, index) => (
-                <div
-                  key={`${item.year}-${item.month}`}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 40}ms` }}
-                >
-                  <MonthCard
-                    data={item}
-                    onClick={() => handleMonthClick(item.month, item.year)}
-                  />
-                </div>
-              ))}
-          </div>
-        )}
+          {/* List */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
+            </div>
+          ) : history.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+              <CalendarDays size={48} className="mb-4 text-slate-600" />
+              <p className="text-sm font-medium">Nenhum histórico encontrado</p>
+              <p className="mt-1 text-xs text-slate-600">
+                Comece adicionando seus primeiros registros
+              </p>
+            </div>
+          ) : (
+            <div className="!space-y-3">
+              {history
+                .sort((a, b) => {
+                  if (a.year !== b.year) return b.year - a.year
+                  return b.month - a.month
+                })
+                .map((item, index) => (
+                  <div
+                    key={`${item.year}-${item.month}`}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 40}ms` }}
+                  >
+                    <MonthCard
+                      data={item}
+                      onClick={() => handleMonthClick(item.month, item.year)}
+                    />
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
       </main>
     </div>
   )

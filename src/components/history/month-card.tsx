@@ -14,7 +14,8 @@ function formatTime(minutes: number): string {
 
 function getMonthLabel(month: number, year: number): string {
   const date = new Date(year, month - 1)
-  return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  const monthLabel = date.toLocaleDateString('pt-BR', { month: 'long' })
+  return `${monthLabel} / ${year}`
 }
 
 export function MonthCard({ data, onClick }: MonthCardProps) {
@@ -22,16 +23,16 @@ export function MonthCard({ data, onClick }: MonthCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className="group w-full rounded-2xl border border-slate-800 bg-slate-900 p-5 text-left transition-all hover:border-slate-700 hover:bg-slate-800/60 active:scale-[0.99]"
+      className="group w-full rounded-2xl border border-slate-800 bg-slate-900 !p-2 text-left transition-all hover:border-slate-700 hover:bg-slate-800/60 active:scale-[0.99]"
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <h3 className="text-base font-semibold capitalize text-slate-200">
           {getMonthLabel(data.month, data.year)}
         </h3>
         <ChevronRight size={20} className="text-slate-500 transition-transform group-hover:translate-x-1" />
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-8">
         <div className="flex items-center gap-2">
           <Clock size={16} className="text-slate-500" />
           <span className="text-sm font-medium text-slate-400">
@@ -42,7 +43,7 @@ export function MonthCard({ data, onClick }: MonthCardProps) {
         <div className="flex items-center gap-2">
           <EuroIcon size={16} className="text-slate-500" />
           <span className="text-sm font-semibold text-emerald-400">
-            €{data.totalEarnings.toFixed(2)}
+            {data.totalEarnings.toFixed(2)}
           </span>
         </div>
       </div>

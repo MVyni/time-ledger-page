@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { useWorkEntries, useToast } from '@/hooks'
 import { ArrowLeft, Lock } from 'lucide-react'
 import { DashboardHeader } from '@/components/dashboard'
-import { MonthlyFeed, MonthlyTotalsCard, ActionButtons } from '@/components/dashboard'
+import { MonthlyFeed, SummaryCards, ActionButtons } from '@/components/dashboard'
 import { Toast, Button } from '@/components/ui'
 import { useMemo } from 'react'
 
@@ -88,22 +88,27 @@ export function HistoryDetailsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="w-full md:max-w-xl lg:max-w-2xl mx-auto">
+      <div className="w-full flex-1 flex flex-col">
         <DashboardHeader />
-        <main className="w-full px-6 py-8">
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Lock size={48} className="mb-4 text-slate-600" />
-            <h2 className="text-xl font-semibold text-slate-300">Histórico Privado</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Faça login para acessar os detalhes do mês.
-            </p>
-            <Button
-              onClick={() => navigate('/login')}
-              className="mt-6 w-full sm:w-auto"
-              size="lg"
-            >
-              Fazer Login
-            </Button>
+        <main
+          className="w-full flex-1 pt-8 pb-24 flex justify-center"
+          style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        >
+          <div className="w-full max-w-3xl px-4 sm:px-6">
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Lock size={48} className="mb-4 text-slate-600" />
+              <h2 className="text-xl font-semibold text-slate-300">Histórico Privado</h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Faça login para acessar os detalhes do mês.
+              </p>
+              <Button
+                onClick={() => navigate('/login')}
+                className="mt-6 w-full sm:w-auto"
+                size="lg"
+              >
+                Fazer Login
+              </Button>
+            </div>
           </div>
         </main>
       </div>
@@ -111,61 +116,63 @@ export function HistoryDetailsPage() {
   }
 
   return (
-    <div className="w-full md:max-w-xl lg:max-w-2xl mx-auto">
+    <div className="w-full flex-1 flex flex-col">
       <DashboardHeader />
 
-      <main className="w-full px-6 py-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/history')}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold capitalize text-slate-200">{monthLabel}</h1>
-            <p className="text-xs text-slate-500">Detalhes do mês</p>
+      <main
+        className="w-full flex-1 pt-8 pb-24 flex justify-center"
+        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+      >
+        <div className="w-full max-w-3xl px-4 sm:px-6">
+          {/* Header */}
+          <div className="!mb-4 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/history')}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-lg font-bold capitalize text-slate-200">{monthLabel}</h1>
+              <p className="text-xs text-slate-500">Detalhes do mês</p>
+            </div>
           </div>
-      </div>
 
-        {/* Monthly feed */}
-        <div className="animate-fade-in">
-          <MonthlyFeed
-            entries={entries}
-            monthLabel={monthLabel}
-            isLoading={isLoading}
-            onRemove={handleRemoveEntry}
-          />
-        </div>
-
-        {/* Monthly totals */}
-        {entries.length > 0 && (
-          <div className="animate-slide-up" style={{ animationDelay: '80ms' }}>
-            <MonthlyTotalsCard
-              totalMinutes={totalMinutes}
-              totalEarnings={totalEarnings}
-            />
-          </div>
-        )}
-
-        {/* Action buttons */}
-        {entries.length > 0 && (
-          <div className="animate-fade-in" style={{ animationDelay: '120ms' }}>
-            <ActionButtons
+          {/* Monthly feed */}
+          <div className="animate-fade-in">
+            <MonthlyFeed
               entries={entries}
-              totalMinutes={totalMinutes}
-              totalEarnings={totalEarnings}
               monthLabel={monthLabel}
-              isAuthenticated={isAuthenticated}
-              isSaving={isSaving}
-              unsavedCount={unsavedEntries.length}
-              onSave={handleSave}
-              onAuthRequired={handleAuthRequired}
+              isLoading={isLoading}
+              onRemove={handleRemoveEntry}
             />
           </div>
-        )}
+
+          {/* Monthly totals */}
+          {entries.length > 0 && (
+            <div className="animate-slide-up !mt-6" style={{ animationDelay: '80ms' }}>
+              <SummaryCards totalMinutes={totalMinutes} totalEarnings={totalEarnings} />
+            </div>
+          )}
+
+          {/* Action buttons */}
+          {entries.length > 0 && (
+            <div className="animate-fade-in !mt-6" style={{ animationDelay: '120ms' }}>
+              <ActionButtons
+                entries={entries}
+                totalMinutes={totalMinutes}
+                totalEarnings={totalEarnings}
+                monthLabel={monthLabel}
+                isAuthenticated={isAuthenticated}
+                isSaving={isSaving}
+                unsavedCount={unsavedEntries.length}
+                onSave={handleSave}
+                onAuthRequired={handleAuthRequired}
+              />
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Toast */}

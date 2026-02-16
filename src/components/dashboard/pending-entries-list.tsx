@@ -105,7 +105,7 @@ export function PendingEntriesList({ entries, onDelete, onEdit }: PendingEntries
 
   return (
     <div className="w-full rounded-2xl border border-slate-800 bg-slate-900 !p-2 flex flex-col">
-      <div className="mb-6 border-b border-slate-800/60 pb-6">
+      <div className="!mb-4 border-b border-slate-800/60 pb-6">
         <h3 className="text-sm font-semibold text-slate-200">Registros Pendentes</h3>
         <p className="mt-0.5 text-xs text-slate-500">Edite ou remova antes de salvar</p>
       </div>

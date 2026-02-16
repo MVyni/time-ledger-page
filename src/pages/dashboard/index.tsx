@@ -66,15 +66,19 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex-1 flex flex-col">
+    <div className="w-full flex-1 flex flex-col">
       <DashboardHeader />
 
-      <main className="w-full flex-1 px-4 sm:px-6 pt-8 pb-24">
-        <div className="flex flex-col gap-y-10">
-        {/* Add entry card */}
-        <div className="animate-fade-in">
-          <AddEntryCard onAdd={handleAddEntry} />
-        </div>
+      <main
+        className="w-full flex-1 pt-8 pb-24 flex justify-center"
+        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+      >
+        <div className="w-full max-w-3xl px-4 sm:px-6">
+          <div className="flex flex-col gap-y-10">
+          {/* Add entry card */}
+          <div className="animate-fade-in">
+            <AddEntryCard onAdd={handleAddEntry} />
+          </div>
 
           {/* Pending list */}
           {pendingEntries.length > 0 && (
@@ -113,16 +117,17 @@ export function DashboardPage() {
           )}
 
           {/* Info card when no pending entries */}
-          {pendingEntries.length === 0 && (
-            <div className="animate-fade-in rounded-xl border border-slate-800 bg-slate-900/60 p-6 text-center">
-              <p className="text-sm font-medium text-slate-400">
-                Nenhum registro pendente
-              </p>
-              <p className="mt-1 text-xs text-slate-600">
-                Adicione dias acima ou acesse o histórico
-              </p>
-            </div>
-          )}
+            {pendingEntries.length === 0 && (
+              <div className="animate-fade-in rounded-xl border border-slate-800 bg-slate-900/60 p-6 text-center">
+                <p className="text-sm font-medium text-slate-400">
+                  Nenhum registro pendente
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  Adicione dias acima ou acesse o histórico
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 

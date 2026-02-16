@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 
 import { AuthLayout } from '@/components/layouts/auth-layout'
-import { Input, Button, Logo, Toast } from '@/components/ui'
+import { Input, Button, Toast } from '@/components/ui'
 import { useForm, useToast } from '@/hooks'
 import { forgotPasswordSchema } from '@/validators/auth-schemas'
 import { makeForgotPasswordService } from '@/services/factories'
@@ -56,10 +56,6 @@ export function ForgotPasswordPage() {
         <Toast message={toast.message} type={toast.type} onClose={hideToast} />
       )}
 
-      <div className="lg:hidden mb-8 flex justify-center">
-        <Logo size="lg" variant="light" />
-      </div>
-
       {emailSent ? (
         <div className="text-center space-y-6 animate-fade-in">
           <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
@@ -106,7 +102,7 @@ export function ForgotPasswordPage() {
             Voltar para o login
           </Link>
 
-          <div className="space-y-2 mb-8 text-center lg:text-left">
+          <div className="space-y-2 mb-8 text-center">
             <h2 className="text-3xl font-bold text-slate-100 tracking-tight">
               Esqueceu sua senha?
             </h2>

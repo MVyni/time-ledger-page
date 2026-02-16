@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, User } from 'lucide-react'
 
 import { AuthLayout } from '@/components/layouts/auth-layout'
-import { Input, Button, Logo, Toast } from '@/components/ui'
+import { Input, Button, Toast } from '@/components/ui'
 import { useForm, useToast } from '@/hooks'
 import { registerSchema } from '@/validators/auth-schemas'
 import { makeRegisterUserService } from '@/services/factories'
@@ -70,11 +70,7 @@ export function RegisterPage() {
         <Toast message={toast.message} type={toast.type} onClose={hideToast} />
       )}
 
-      <div className="lg:hidden mb-8 flex justify-center">
-        <Logo size="lg" variant="light" />
-      </div>
-
-      <div className="space-y-2 mb-8 text-center lg:text-left">
+      <div className="space-y-2 mb-8 text-center">
         <h2 className="text-3xl font-bold text-slate-100 tracking-tight">
           Crie sua conta
         </h2>
