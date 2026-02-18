@@ -95,7 +95,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 [color-scheme:dark]"
+            className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 [color-scheme:dark]"
           />
         </div>
 
@@ -114,7 +114,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
               placeholder="Ex: 9:00"
               value={hours}
               onChange={e => setHours(e.target.value)}
-              className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
@@ -133,7 +133,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
               placeholder="Ex: 50.00"
               value={rate}
               onChange={e => setRate(e.target.value)}
-              className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
         </div>
