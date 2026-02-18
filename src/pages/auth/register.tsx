@@ -70,7 +70,7 @@ export function RegisterPage() {
         <Toast message={toast.message} type={toast.type} onClose={hideToast} />
       )}
 
-      <div className="space-y-2 mb-8 text-center">
+      <div className="!mb-10 text-center">
         <h2 className="text-3xl font-bold text-slate-100 tracking-tight">
           Crie sua conta
         </h2>
@@ -79,7 +79,7 @@ export function RegisterPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-7">
+      <form onSubmit={handleSubmit} className="!space-y-3">
         <Input
           label="Nome completo"
           type="text"
@@ -124,17 +124,19 @@ export function RegisterPage() {
           autoComplete="new-password"
         />
 
-        <Button
-          type="submit"
-          isLoading={isSubmitting}
-          className="w-full"
-          size="lg"
-        >
-          Criar conta
-        </Button>
+        <div className="!pt-4">
+          <Button
+            type="submit"
+            isLoading={isSubmitting}
+            className="w-full"
+            size="lg"
+          >
+            Criar conta
+          </Button>
+        </div>
       </form>
 
-      <p className="text-center text-sm text-slate-400 mt-10">
+      <p className="text-center text-sm text-slate-400 !mt-5">
         Já tem uma conta?{' '}
         <Link
           to="/login"

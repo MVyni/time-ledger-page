@@ -28,10 +28,3 @@ export class NetworkError extends AppError {
     this.name = 'NetworkError'
   }
 }
-
-export class UnauthorizedError extends AppError {
-  constructor() {
-    super('Sessão expirada. Faça login novamente.', 401)
-    this.name = 'UnauthorizedError'
-  }
-}

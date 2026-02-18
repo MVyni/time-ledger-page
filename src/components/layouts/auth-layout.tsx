@@ -7,9 +7,12 @@ interface AuthLayoutProps {
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="w-full flex-1 flex flex-col bg-slate-950">
-      <main className="w-full flex-1 flex items-center justify-center px-4 py-10 sm:px-6 sm:py-14">
-        <div className="w-full max-w-lg">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 shadow-lg shadow-black/25">
+      <main className="w-full flex-1 flex items-stretch justify-center px-0 py-0 lg:items-center lg:px-6 lg:py-14">
+        <div className="w-full lg:max-w-lg">
+          <div
+            className="min-h-screen rounded-none border-0 bg-slate-950 p-6 shadow-none flex flex-col justify-center lg:min-h-0 lg:rounded-2xl lg:border lg:border-slate-800 lg:bg-slate-900/60 lg:p-8 lg:shadow-lg lg:shadow-black/25"
+            style={{ minHeight: '100dvh', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+          >
             <div className="animate-fade-in">{children}</div>
           </div>
         </div>

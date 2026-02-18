@@ -6,8 +6,6 @@ import { PublicRoute } from '@/routes/public-route'
 import {
   LoginPage,
   RegisterPage,
-  ForgotPasswordPage,
-  ResetPasswordPage,
 } from '@/pages/auth'
 import { DashboardPage } from '@/pages/dashboard'
 import { HistoryPage } from '@/pages/history'
@@ -22,8 +20,6 @@ export function AppRouter() {
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Route>
 
           {/* Dashboard - accessible to all (save/export locked behind auth) */}

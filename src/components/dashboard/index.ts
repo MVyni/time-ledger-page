@@ -1,7 +1,6 @@
 export { DashboardHeader } from './header'
 export { AddEntryCard } from './add-entry-card'
 export { MonthlyFeed } from './monthly-feed'
-export { MonthlyTotalsCard } from './monthly-totals-card'
 export { ActionButtons } from './action-buttons'
 export { PendingEntriesList } from './pending-entries-list'
 export { SummaryCards } from './summary-cards'

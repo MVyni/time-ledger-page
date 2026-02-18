@@ -1,5 +1,3 @@
 export { Input } from './input'
-export { InputGroup } from './input-group'
 export { Button } from './button'
 export { Toast, type ToastType } from './toast'
-export { Logo } from './logo'

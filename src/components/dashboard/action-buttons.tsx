@@ -4,8 +4,8 @@ import type { WorkEntry } from '@/types'
 interface ActionButtonsProps {
   entries: WorkEntry[]
   totalMinutes: number
-  totalEarnings: number
   monthLabel: string
+  userName?: string | null
   isAuthenticated: boolean
   isSaving: boolean
   unsavedCount: number
@@ -22,23 +22,23 @@ function formatTime(minutes: number): string {
 function buildWhatsAppMessage(
   entries: WorkEntry[],
   totalMinutes: number,
-  totalEarnings: number,
   monthLabel: string,
+  userName?: string | null,
 ): string {
-  const header = `📊 *Time Ledger — ${monthLabel}*\n\n`
+  const safeUserName = userName?.trim() ? userName.trim() : 'Usuário'
+  const header = `*Time Ledger — ${safeUserName}*\n${monthLabel}\n\n`
 
   const lines = entries.map(entry => {
     const date = new Date(entry.date).toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
     })
-    const subtotal = (entry.durationMinutes / 60) * entry.hourlyRate
-    return `${date}: ${formatTime(entry.durationMinutes)} — €${subtotal.toFixed(2)}`
+    return `${date}: ${formatTime(entry.durationMinutes)}`
   })
 
   const body = lines.join('\n')
 
-  const footer = `\n\n📋 *TOTAIS DO MÊS:*\n🕐 Horas: ${formatTime(totalMinutes)}\n💰 Total: €${totalEarnings.toFixed(2)}`
+  const footer = `\n\nTOTAL DO MÊS:\nHoras: ${formatTime(totalMinutes)}`
 
   return header + body + footer
 }
@@ -46,8 +46,8 @@ function buildWhatsAppMessage(
 export function ActionButtons({
   entries,
   totalMinutes,
-  totalEarnings,
   monthLabel,
+  userName,
   isAuthenticated,
   isSaving,
   unsavedCount,
@@ -62,7 +62,7 @@ export function ActionButtons({
 
     if (entries.length === 0) return
 
-    const message = buildWhatsAppMessage(entries, totalMinutes, totalEarnings, monthLabel)
+    const message = buildWhatsAppMessage(entries, totalMinutes, monthLabel, userName)
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`
     window.open(url, '_blank')
   }

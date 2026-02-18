@@ -68,7 +68,7 @@ export function LoginPage() {
         <Toast message={toast.message} type={toast.type} onClose={hideToast} />
       )}
 
-      <div className="space-y-2 mb-8 text-center">
+      <div className="!mb-10 text-center">
         <h2 className="text-3xl font-bold text-slate-100 tracking-tight">
           Bem-vindo de volta
         </h2>
@@ -77,7 +77,7 @@ export function LoginPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-7">
+      <form onSubmit={handleSubmit} className="!space-y-3">
         <Input
           label="E-mail"
           type="email"
@@ -100,7 +100,7 @@ export function LoginPage() {
           autoComplete="current-password"
         />
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-5 !p-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -108,35 +108,31 @@ export function LoginPage() {
             />
             <span className="text-sm text-slate-400">Lembrar de mim</span>
           </label>
-          <Link
-            to="/forgot-password"
-            className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors sm:text-right"
-          >
-            Esqueceu a senha?
-          </Link>
         </div>
 
-        <Button
-          type="submit"
-          isLoading={isSubmitting}
-          className="w-full"
-          size="lg"
-        >
-          Entrar
-        </Button>
+        <div className="pt-2">
+          <Button
+            type="submit"
+            isLoading={isSubmitting}
+            className="w-full"
+            size="lg"
+          >
+            Entrar
+          </Button>
+        </div>
       </form>
 
-      <div className="mt-10">
+      <div className="!mt-10">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-800/70" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-slate-900/60 px-4 text-slate-500">ou</span>
+            <span className="bg-slate-950 px-4 text-slate-500 lg:bg-slate-900/60">ou</span>
           </div>
         </div>
 
-        <p className="text-center text-sm text-slate-400 mt-6">
+        <p className="text-center text-sm text-slate-400 !mt-5">
           Não tem uma conta?{' '}
           <Link
             to="/register"

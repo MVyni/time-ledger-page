@@ -3,8 +3,6 @@ export type {
   AuthResponse, 
   RegisterRequest, 
   AuthenticateRequest,
-  ForgotPasswordRequest,
-  ResetPasswordRequest,
 } from './user'
 
 export type {

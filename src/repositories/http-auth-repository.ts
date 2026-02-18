@@ -39,25 +39,6 @@ export class HttpAuthRepository implements AuthRepository {
     }
   }
 
-  async forgotPassword(email: string): Promise<void> {
-    try {
-      await this.httpClient.post('/api/user/forgot-password', { email })
-    } catch {
-      // Silently succeed to prevent email enumeration
-    }
-  }
-
-  async resetPassword(token: string, password: string): Promise<void> {
-    try {
-      await this.httpClient.post('/api/user/reset-password', { token, password })
-    } catch (error) {
-      if (this.isHttpError(error)) {
-        throw new AppError('Link de redefinição inválido ou expirado.', 400)
-      }
-      throw new NetworkError()
-    }
-  }
-
   private isHttpError(error: unknown): error is Response {
     return error instanceof Response
   }

@@ -12,7 +12,7 @@ interface InputGroupProps {
 
 export function InputGroup({ label, htmlFor, hint, error, icon: Icon, children }: InputGroupProps) {
   return (
-    <div className="w-full space-y-2.5">
+    <div className="w-full space-y-3.5">
       <label
         htmlFor={htmlFor}
         className="flex items-center gap-2 text-sm font-semibold text-slate-300"

@@ -10,7 +10,7 @@ import {
 } from '@/components/dashboard'
 
 export function DashboardPage() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { toast, showToast, hideToast } = useToast()
   const {
     pendingEntries,
@@ -105,8 +105,8 @@ export function DashboardPage() {
               <ActionButtons
                 entries={pendingEntries}
                 totalMinutes={pendingTotalMinutes}
-                totalEarnings={pendingTotalEarnings}
                 monthLabel={monthLabel}
+                userName={user?.name}
                 isAuthenticated={isAuthenticated}
                 isSaving={isSaving}
                 unsavedCount={pendingEntries.length}

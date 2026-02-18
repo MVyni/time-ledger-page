@@ -37,7 +37,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={inputType}
             className={`
-              w-full flex-1 bg-transparent px-4 py-3.5 text-sm text-slate-100 outline-none
+              h-12 !pl-2 w-full flex-1 bg-transparent px-4 text-base text-slate-100 outline-none
               placeholder:text-slate-500
               disabled:text-slate-500
               ${isPassword ? '!pr-0' : ''}
@@ -50,7 +50,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="flex items-center px-4 text-slate-400 hover:text-slate-200 transition-colors focus:outline-none"
+              className="flex items-center px-4 !pr-2 text-slate-400 hover:text-slate-200 transition-colors focus:outline-none"
               tabIndex={-1}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

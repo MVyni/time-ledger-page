@@ -21,7 +21,7 @@ function getMonthLabel(month: number, year: number): string {
 export function HistoryDetailsPage() {
   const navigate = useNavigate()
   const { year, month } = useParams<{ year: string; month: string }>()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { toast, showToast, hideToast } = useToast()
   const { allEntries, removeEntry, isLoading, isSaving, saveAll } = useWorkEntries()
 
@@ -162,8 +162,8 @@ export function HistoryDetailsPage() {
               <ActionButtons
                 entries={entries}
                 totalMinutes={totalMinutes}
-                totalEarnings={totalEarnings}
                 monthLabel={monthLabel}
+                userName={user?.name}
                 isAuthenticated={isAuthenticated}
                 isSaving={isSaving}
                 unsavedCount={unsavedEntries.length}
