@@ -5,14 +5,44 @@ import { CalendarDays, ArrowLeft, Lock } from 'lucide-react'
 import { MonthCard } from '@/components/history'
 import { DashboardHeader } from '@/components/dashboard'
 import { Button } from '@/components/ui'
+import { useState } from 'react'
+import { makeDeleteWorkEntryService, makeFetchWorkEntriesService } from '@/services/factories'
 
 export function HistoryPage() {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const { history, isLoading } = useMonthlyHistory()
+  const { history, isLoading, reload } = useMonthlyHistory()
+  const [deletingKey, setDeletingKey] = useState<string | null>(null)
 
   function handleMonthClick(month: number, year: number) {
     navigate(`/history/${year}/${month}`)
+  }
+
+  async function handleDeleteMonth(month: number, year: number) {
+    const key = `${year}-${month}`
+    if (deletingKey) return
+
+    setDeletingKey(key)
+    try {
+      const fetchService = makeFetchWorkEntriesService()
+      const { entries } = await fetchService.execute()
+
+      const ids = entries
+        .filter(e => {
+          const d = new Date(e.date)
+          return d.getFullYear() === year && d.getMonth() + 1 === month
+        })
+        .map(e => e.id)
+
+      const deleteService = makeDeleteWorkEntryService()
+      for (const id of ids) {
+        await deleteService.execute(id)
+      }
+
+      await reload()
+    } finally {
+      setDeletingKey(null)
+    }
   }
 
   if (!isAuthenticated) {
@@ -97,6 +127,8 @@ export function HistoryPage() {
                     <MonthCard
                       data={item}
                       onClick={() => handleMonthClick(item.month, item.year)}
+                      onDelete={() => handleDeleteMonth(item.month, item.year)}
+                      isDeleting={deletingKey === `${item.year}-${item.month}`}
                     />
                   </div>
                 ))}

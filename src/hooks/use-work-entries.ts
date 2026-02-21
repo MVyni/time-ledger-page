@@ -1,6 +1,11 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { useAuth } from '@/contexts/auth-context'
-import { makeFetchWorkEntriesService, makeCreateWorkEntryService, makeDeleteWorkEntryService } from '@/services/factories'
+import {
+  makeFetchWorkEntriesService,
+  makeCreateWorkEntryService,
+  makeDeleteWorkEntryService,
+  makeUpdateWorkEntryService,
+} from '@/services/factories'
 import type { WorkEntry, WorkEntryApiResponse } from '@/types'
 
 const GUEST_ENTRIES_KEY = '@time-ledger:guest-entries:v1'
@@ -268,6 +273,64 @@ export function useWorkEntries() {
     [entries],
   )
 
+  const editEntry = useCallback(
+    async (id: string, data: { date: string; durationMinutes: number; hourlyRate: number }) => {
+      if (!Number.isFinite(data.durationMinutes) || data.durationMinutes <= 0 || data.durationMinutes > 24 * 60) {
+        throw new Error('Duração inválida.')
+      }
+      if (!Number.isFinite(data.hourlyRate) || data.hourlyRate <= 0) {
+        throw new Error('Valor/hora inválido.')
+      }
+
+      const nextDate = new Date(data.date)
+      if (Number.isNaN(nextDate.getTime())) {
+        throw new Error('Data inválida.')
+      }
+
+      const target = entries.find(e => e.id === id)
+      if (!target) return
+
+      // Prevent duplicate date (same rule as backend)
+      const nextDateStr = nextDate.toDateString()
+      const duplicate = entries.find(e => e.id !== id && new Date(e.date).toDateString() === nextDateStr)
+      if (duplicate) {
+        throw new Error('Já existe um registro para esta data.')
+      }
+
+      // Pending (unsaved): update locally
+      if (!target.saved) {
+        updateEntry(id, data)
+        return
+      }
+
+      // Saved: update via API and reflect locally
+      if (!isAuthenticated) {
+        throw new Error('AUTH_REQUIRED')
+      }
+
+      const service = makeUpdateWorkEntryService()
+      await service.execute(id, {
+        date: nextDate.toISOString(),
+        durationMinutes: data.durationMinutes,
+        hourlyRateAtTime: data.hourlyRate,
+      })
+
+      setEntries(prev =>
+        prev.map(e => {
+          if (e.id !== id) return e
+          return {
+            ...e,
+            date: nextDate.toISOString(),
+            durationMinutes: data.durationMinutes,
+            hourlyRate: data.hourlyRate,
+            saved: true,
+          }
+        }),
+      )
+    },
+    [entries, isAuthenticated, updateEntry],
+  )
+
   const removeEntry = useCallback(
     async (id: string) => {
       const entry = entries.find(e => e.id === id)
@@ -362,6 +425,7 @@ export function useWorkEntries() {
     currentYear,
     addEntry,
     updateEntry,
+    editEntry,
     removeEntry,
     saveAll,
     goToPreviousMonth,

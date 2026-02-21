@@ -62,6 +62,22 @@ export class HttpWorkEntryRepository implements WorkEntryRepository {
     }
   }
 
+  async update(workEntryId: string, data: CreateWorkEntryRequest): Promise<void> {
+    try {
+      await this.httpClient.put(`/api/workentrie/update/${workEntryId}`, data)
+    } catch (error) {
+      if (error instanceof AppError) throw error
+      if (this.isHttpError(error)) {
+        const status = error.status
+        if (status === 409) throw new AppError('Já existe um registro para esta data.', 409)
+        if (status === 404) throw new AppError('Registro não encontrado.', 404)
+        if (status === 400) throw new AppError(await this.extractMessage(error), 400)
+        if (status === 401) throw new AppError('Sessão expirada. Faça login novamente.', 401)
+      }
+      throw new NetworkError()
+    }
+  }
+
   private isHttpError(error: unknown): error is Response {
     return error instanceof Response
   }

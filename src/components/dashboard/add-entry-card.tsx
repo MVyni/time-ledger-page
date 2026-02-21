@@ -1,16 +1,86 @@
-import { useState } from 'react'
-import { Plus, CalendarDays, Clock, EuroIcon } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Plus, CalendarDays, Clock, EuroIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface AddEntryCardProps {
-  onAdd: (date: string, durationMinutes: number, ratePerHour: number) => void
+  onAdd: (dates: string | string[], durationMinutes: number, ratePerHour: number) => void
+}
+
+function formatYmd(date: Date): string {
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+function makeYmd(year: number, monthIndex: number, day: number): string {
+  const mm = String(monthIndex + 1).padStart(2, '0')
+  const dd = String(day).padStart(2, '0')
+  return `${year}-${mm}-${dd}`
 }
 
 export function AddEntryCard({ onAdd }: AddEntryCardProps) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = formatYmd(new Date())
   const [date, setDate] = useState(today)
   const [hours, setHours] = useState('')
   const [rate, setRate] = useState('')
   const [error, setError] = useState('')
+
+  const [multiMode, setMultiMode] = useState(false)
+  const initialView = useMemo(() => {
+    const d = new Date()
+    return { year: d.getFullYear(), month: d.getMonth() }
+  }, [])
+  const [viewYear, setViewYear] = useState(initialView.year)
+  const [viewMonth, setViewMonth] = useState(initialView.month) // 0-11
+  const [selectedDates, setSelectedDates] = useState<string[]>([])
+
+  const selectedSet = useMemo(() => new Set(selectedDates), [selectedDates])
+
+  const monthLabel = useMemo(() => {
+    const d = new Date(viewYear, viewMonth, 1)
+    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  }, [viewYear, viewMonth])
+
+  const calendarCells = useMemo(() => {
+    const first = new Date(viewYear, viewMonth, 1)
+    const startWeekday = first.getDay() // 0=Dom
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+
+    return Array.from({ length: 42 }, (_, i) => {
+      const day = i - startWeekday + 1
+      if (day < 1 || day > daysInMonth) return null
+      return day
+    })
+  }, [viewYear, viewMonth])
+
+  function toggleSelected(ymd: string) {
+    setSelectedDates(prev => {
+      const set = new Set(prev)
+      if (set.has(ymd)) set.delete(ymd)
+      else set.add(ymd)
+      return Array.from(set)
+    })
+  }
+
+  function goPrevMonth() {
+    setViewMonth(prev => {
+      if (prev === 0) {
+        setViewYear(y => y - 1)
+        return 11
+      }
+      return prev - 1
+    })
+  }
+
+  function goNextMonth() {
+    setViewMonth(prev => {
+      if (prev === 11) {
+        setViewYear(y => y + 1)
+        return 0
+      }
+      return prev + 1
+    })
+  }
 
   function parseHoursToMinutes(raw: string): number {
     const value = raw.trim()
@@ -46,8 +116,13 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
     const durationMinutes = parseHoursToMinutes(hours)
     const rateNum = parseFloat(rate)
 
-    if (!date) {
+    if (!multiMode && !date) {
       setError('Selecione uma data.')
+      return
+    }
+
+    if (multiMode && selectedDates.length === 0) {
+      setError('Selecione pelo menos um dia no calendário.')
       return
     }
 
@@ -62,10 +137,15 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
     }
 
     try {
-      onAdd(date, durationMinutes, rateNum)
+      const datesToAdd = multiMode ? selectedDates.slice().sort() : date
+      onAdd(datesToAdd, durationMinutes, rateNum)
       setHours('')
       setRate('')
       setError('')
+
+      if (multiMode) {
+        setSelectedDates([])
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)
@@ -85,18 +165,108 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         {/* Date */}
         <div>
-          <label className="block text-sm font-medium mb-1.5 text-slate-400">
+          <div className="flex items-center justify-between gap-4">
+            <label className="block text-sm font-medium mb-1.5 text-slate-400">
             <span className="flex items-center gap-1.5">
               <CalendarDays size={14} />
               Data
             </span>
-          </label>
-          <input
-            type="date"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 [color-scheme:dark]"
-          />
+            </label>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMultiMode(v => {
+                  const next = !v
+                  if (next) {
+                    const base = date ? new Date(date) : new Date()
+                    setViewYear(base.getFullYear())
+                    setViewMonth(base.getMonth())
+                    setSelectedDates(prev => (prev.length ? prev : [formatYmd(base)]))
+                  }
+                  return next
+                })
+              }}
+              className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              {multiMode ? 'Selecionar 1 dia' : 'Selecionar vários dias'}
+            </button>
+          </div>
+
+          {!multiMode ? (
+            <input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 [color-scheme:dark]"
+            />
+          ) : (
+            <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-900 p-3">
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={goPrevMonth}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+                  aria-label="Mês anterior"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <div className="min-w-0 text-center">
+                  <p className="text-sm font-semibold capitalize text-slate-200">{monthLabel}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Selecionados: {selectedDates.length}
+                    {selectedDates.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDates([])}
+                        className="!ml-4 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors"
+                      >
+                        Limpar
+                      </button>
+                    ) : null}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={goNextMonth}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200"
+                  aria-label="Próximo mês"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+
+              <div className="mt-3 grid grid-cols-7 gap-1 text-center">
+                {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(d => (
+                  <div key={d} className="py-1 text-[11px] font-semibold text-slate-500">
+                    {d}
+                  </div>
+                ))}
+
+                {calendarCells.map((day, idx) => {
+                  if (!day) return <div key={idx} className="h-9" />
+                  const ymd = makeYmd(viewYear, viewMonth, day)
+                  const isSelected = selectedSet.has(ymd)
+                  return (
+                    <button
+                      key={ymd}
+                      type="button"
+                      onClick={() => toggleSelected(ymd)}
+                      className={
+                        `h-9 rounded-lg text-sm font-semibold transition-colors ` +
+                        (isSelected
+                          ? 'bg-blue-500/10 text-slate-100 ring-1 ring-blue-500/40'
+                          : 'text-slate-300 hover:bg-slate-800')
+                      }
+                      aria-pressed={isSelected}
+                    >
+                      {day}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

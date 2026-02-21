@@ -24,9 +24,32 @@ export function DashboardPage() {
     saveAll,
   } = useWorkEntries()
 
-  function handleAddEntry(date: string, durationMinutes: number, ratePerHour: number) {
-    addEntry(date, durationMinutes, ratePerHour)
-    showToast('Registro adicionado à lista.', 'success')
+  function handleAddEntry(dates: string | string[], durationMinutes: number, ratePerHour: number) {
+    const list = Array.isArray(dates) ? dates : [dates]
+
+    let successCount = 0
+    const errors: string[] = []
+
+    for (const d of list) {
+      try {
+        addEntry(d, durationMinutes, ratePerHour)
+        successCount += 1
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Erro ao adicionar registro.'
+        errors.push(`${d}: ${msg}`)
+      }
+    }
+
+    if (successCount > 0) {
+      showToast(
+        successCount === 1 ? 'Registro adicionado à lista.' : `${successCount} registros adicionados à lista.`,
+        'success',
+      )
+    }
+
+    if (errors.length > 0) {
+      throw new Error(errors.length === 1 ? errors[0] : `Algumas datas não foram adicionadas (${errors.length}).`)
+    }
   }
 
   async function handleSave() {

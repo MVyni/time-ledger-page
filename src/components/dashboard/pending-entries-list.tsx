@@ -5,7 +5,9 @@ import type { WorkEntry } from '@/types'
 interface PendingEntriesListProps {
   entries: WorkEntry[]
   onDelete: (id: string) => void | Promise<void>
-  onEdit: (id: string, data: { date: string; durationMinutes: number; hourlyRate: number }) => void
+  onEdit: (id: string, data: { date: string; durationMinutes: number; hourlyRate: number }) => void | Promise<void>
+  title?: string
+  subtitle?: string
 }
 
 function formatDate(isoDate: string): string {
@@ -40,7 +42,13 @@ function formatCurrency(value: number): string {
   return `€${value.toFixed(2)}`
 }
 
-export function PendingEntriesList({ entries, onDelete, onEdit }: PendingEntriesListProps) {
+export function PendingEntriesList({
+  entries,
+  onDelete,
+  onEdit,
+  title = 'Registros Pendentes',
+  subtitle = 'Edite ou remova antes de salvar',
+}: PendingEntriesListProps) {
   const sorted = useMemo(
     () => entries.slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
     [entries],
@@ -73,7 +81,7 @@ export function PendingEntriesList({ entries, onDelete, onEdit }: PendingEntries
     setEditRate('')
   }
 
-  function submitEdit() {
+  async function submitEdit() {
     setError('')
 
     const durationMinutes = parseHoursToMinutes(editHours)
@@ -95,19 +103,24 @@ export function PendingEntriesList({ entries, onDelete, onEdit }: PendingEntries
     }
 
     if (!editingId) return
-    onEdit(editingId, {
-      date: editDate,
-      durationMinutes,
-      hourlyRate: rateNum,
-    })
-    cancelEdit()
+    try {
+      await onEdit(editingId, {
+        date: editDate,
+        durationMinutes,
+        hourlyRate: rateNum,
+      })
+      cancelEdit()
+    } catch (err) {
+      if (err instanceof Error && err.message) setError(err.message)
+      else setError('Erro ao editar registro.')
+    }
   }
 
   return (
     <div className="w-full rounded-2xl border border-slate-800 bg-slate-900 !p-2 flex flex-col">
       <div className="!mb-4 border-b border-slate-800/60 pb-6">
-        <h3 className="text-sm font-semibold text-slate-200">Registros Pendentes</h3>
-        <p className="mt-0.5 text-xs text-slate-500">Edite ou remova antes de salvar</p>
+        <h3 className="text-sm font-semibold text-slate-200">{title}</h3>
+        <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
       </div>
 
       <ul className="flex flex-col gap-y-4">

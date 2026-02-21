@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { useWorkEntries, useToast } from '@/hooks'
 import { ArrowLeft, Lock } from 'lucide-react'
 import { DashboardHeader } from '@/components/dashboard'
-import { MonthlyFeed, SummaryCards, ActionButtons } from '@/components/dashboard'
+import { SummaryCards, ActionButtons, PendingEntriesList } from '@/components/dashboard'
 import { Toast, Button } from '@/components/ui'
 import { useMemo } from 'react'
 
@@ -23,7 +23,7 @@ export function HistoryDetailsPage() {
   const { year, month } = useParams<{ year: string; month: string }>()
   const { isAuthenticated, user } = useAuth()
   const { toast, showToast, hideToast } = useToast()
-  const { allEntries, removeEntry, isLoading, isSaving, saveAll } = useWorkEntries()
+  const { allEntries, removeEntry, editEntry, isLoading, isSaving, saveAll } = useWorkEntries()
 
   const yearNum = Number(year)
   const monthNum = Number(month)
@@ -66,6 +66,23 @@ export function HistoryDetailsPage() {
       showToast('Registro removido.', 'info')
     } catch {
       showToast('Erro ao remover registro.', 'error')
+    }
+  }
+
+  async function handleEditEntry(
+    id: string,
+    data: { date: string; durationMinutes: number; hourlyRate: number },
+  ) {
+    try {
+      await editEntry(id, data)
+      showToast('Registro atualizado.', 'success')
+    } catch (err) {
+      if (err instanceof Error && err.message === 'AUTH_REQUIRED') {
+        showToast('Faça login para editar.', 'error')
+        return
+      }
+      showToast(err instanceof Error ? err.message : 'Erro ao editar registro.', 'error')
+      throw err
     }
   }
 
@@ -141,12 +158,19 @@ export function HistoryDetailsPage() {
 
           {/* Monthly feed */}
           <div className="animate-fade-in">
-            <MonthlyFeed
-              entries={entries}
-              monthLabel={monthLabel}
-              isLoading={isLoading}
-              onRemove={handleRemoveEntry}
-            />
+            {isLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
+              </div>
+            ) : (
+              <PendingEntriesList
+                entries={entries}
+                onDelete={handleRemoveEntry}
+                onEdit={handleEditEntry}
+                title="Registros do Mês"
+                subtitle="Edite ou remova seus registros"
+              />
+            )}
           </div>
 
           {/* Monthly totals */}
