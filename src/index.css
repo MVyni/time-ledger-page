@@ -38,6 +38,11 @@
   box-sizing: border-box;
 }
 
+html {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+}
+
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -46,6 +51,10 @@ body {
 
 body {
   overflow-x: clip;
+}
+
+input, select, textarea {
+  font-size: 16px !important;
 }
 
 @supports (-webkit-touch-callout: none) {
