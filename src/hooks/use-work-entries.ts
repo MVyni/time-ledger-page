@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import {
   makeFetchWorkEntriesService,
@@ -96,6 +96,10 @@ export function useWorkEntries() {
   const [entries, setEntries] = useState<WorkEntry[]>(() => loadGuestEntries())
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  // Ref to always have the latest entries without adding to useCallback deps
+  const entriesRef = useRef(entries)
+  entriesRef.current = entries
 
   const now = new Date()
   const [currentMonth, setCurrentMonth] = useState(now.getMonth())
@@ -215,7 +219,7 @@ export function useWorkEntries() {
 
       // Check duplicate date in current entries
       const dateStr = new Date(date).toDateString()
-      const duplicate = entries.find(
+      const duplicate = entriesRef.current.find(
         e => new Date(e.date).toDateString() === dateStr,
       )
       if (duplicate) {
@@ -232,7 +236,7 @@ export function useWorkEntries() {
 
       setEntries(prev => [...prev, entry])
     },
-    [entries],
+    [],
   )
 
   const updateEntry = useCallback(
@@ -251,7 +255,7 @@ export function useWorkEntries() {
 
       // Prevent duplicate date (same rule as backend)
       const nextDateStr = nextDate.toDateString()
-      const duplicate = entries.find(e => e.id !== id && new Date(e.date).toDateString() === nextDateStr)
+      const duplicate = entriesRef.current.find(e => e.id !== id && new Date(e.date).toDateString() === nextDateStr)
       if (duplicate) {
         throw new Error('Já existe um registro para esta data.')
       }
@@ -270,7 +274,7 @@ export function useWorkEntries() {
         }),
       )
     },
-    [entries],
+    [],
   )
 
   const editEntry = useCallback(
@@ -287,12 +291,12 @@ export function useWorkEntries() {
         throw new Error('Data inválida.')
       }
 
-      const target = entries.find(e => e.id === id)
+      const target = entriesRef.current.find(e => e.id === id)
       if (!target) return
 
       // Prevent duplicate date (same rule as backend)
       const nextDateStr = nextDate.toDateString()
-      const duplicate = entries.find(e => e.id !== id && new Date(e.date).toDateString() === nextDateStr)
+      const duplicate = entriesRef.current.find(e => e.id !== id && new Date(e.date).toDateString() === nextDateStr)
       if (duplicate) {
         throw new Error('Já existe um registro para esta data.')
       }
@@ -328,12 +332,12 @@ export function useWorkEntries() {
         }),
       )
     },
-    [entries, isAuthenticated, updateEntry],
+    [isAuthenticated, updateEntry],
   )
 
   const removeEntry = useCallback(
     async (id: string) => {
-      const entry = entries.find(e => e.id === id)
+      const entry = entriesRef.current.find(e => e.id === id)
       if (!entry) return
 
       if (entry.saved && isAuthenticated) {
@@ -347,7 +351,7 @@ export function useWorkEntries() {
 
       setEntries(prev => prev.filter(e => e.id !== id))
     },
-    [entries, isAuthenticated],
+    [isAuthenticated],
   )
 
   const saveAll = useCallback(async () => {
@@ -355,20 +359,22 @@ export function useWorkEntries() {
       throw new Error('AUTH_REQUIRED')
     }
 
-    const allUnsaved = entries.filter(e => !e.saved)
+    const allUnsaved = entriesRef.current.filter(e => !e.saved)
     if (allUnsaved.length === 0) return
 
     setIsSaving(true)
     try {
       const service = makeCreateWorkEntryService()
 
-      for (const entry of allUnsaved) {
-        await service.execute({
-          date: entry.date,
-          durationMinutes: entry.durationMinutes,
-          hourlyRateAtTime: entry.hourlyRate,
-        })
-      }
+      await Promise.all(
+        allUnsaved.map(entry =>
+          service.execute({
+            date: entry.date,
+            durationMinutes: entry.durationMinutes,
+            hourlyRateAtTime: entry.hourlyRate,
+          }),
+        ),
+      )
 
       // Saved successfully: clear local pending list immediately
       setEntries(prev => prev.filter(e => e.saved))
@@ -381,7 +387,7 @@ export function useWorkEntries() {
     } finally {
       setIsSaving(false)
     }
-  }, [isAuthenticated, entries, loadEntries])
+  }, [isAuthenticated, loadEntries])
 
   const monthLabel = useMemo(() => {
     const date = new Date(currentYear, currentMonth)

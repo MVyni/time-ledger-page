@@ -4,6 +4,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   type ReactNode,
 } from 'react'
 import { TokenStorage } from '@/lib/token-storage'
@@ -47,10 +48,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (token) {
       httpClient.setAuthToken(token)
       setIsAuthenticated(true)
-      loadUser()
+      loadUser().finally(() => setIsLoading(false))
+    } else {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }, [loadUser])
 
   const signIn = useCallback((token: string) => {
@@ -67,10 +68,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null)
   }, [])
 
+  const value = useMemo<AuthContextData>(
+    () => ({ isAuthenticated, isLoading, user, signIn, signOut }),
+    [isAuthenticated, isLoading, user, signIn, signOut],
+  )
+
   return (
-    <AuthContext.Provider
-      value={{ isAuthenticated, isLoading, user, signIn, signOut }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )

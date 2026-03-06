@@ -49,10 +49,13 @@ export function RegisterPage() {
       })
 
       showToast('Conta criada com sucesso! Faça login.', 'success')
-      
-      setTimeout(() => {
+
+      const timer = setTimeout(() => {
         navigate('/login')
       }, 1500)
+
+      // Return cleanup in case component unmounts
+      return () => clearTimeout(timer)
     } catch (error) {
       if (error instanceof AppError) {
         showToast(error.message, 'error')

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { ChevronRight, Clock, EuroIcon, Trash2 } from 'lucide-react'
 import type { MonthlyHistory } from '@/types'
 
@@ -20,7 +21,7 @@ function getMonthLabel(month: number, year: number): string {
   return `${monthLabel} / ${year}`
 }
 
-export function MonthCard({ data, onClick, onDelete, isDeleting = false }: MonthCardProps) {
+export const MonthCard = memo(function MonthCard({ data, onClick, onDelete, isDeleting = false }: MonthCardProps) {
   return (
     <div className="group relative w-full rounded-2xl border border-slate-800 bg-slate-900 transition-all hover:border-slate-700 hover:bg-slate-800/60">
       <button
@@ -63,4 +64,4 @@ export function MonthCard({ data, onClick, onDelete, isDeleting = false }: Month
       </button>
     </div>
   )
-}
+})

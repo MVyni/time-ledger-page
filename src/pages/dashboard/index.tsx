@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useWorkEntries, useToast } from '@/hooks'
 import { Toast } from '@/components/ui'
@@ -9,6 +10,8 @@ import {
   SummaryCards,
 } from '@/components/dashboard'
 
+const mainStyle = { paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' } as const
+
 export function DashboardPage() {
   const { isAuthenticated, user } = useAuth()
   const { toast, showToast, hideToast } = useToast()
@@ -16,6 +19,7 @@ export function DashboardPage() {
     pendingEntries,
     pendingTotalMinutes,
     pendingTotalEarnings,
+    isLoading,
     isSaving,
     monthLabel,
     addEntry,
@@ -24,35 +28,38 @@ export function DashboardPage() {
     saveAll,
   } = useWorkEntries()
 
-  function handleAddEntry(dates: string | string[], durationMinutes: number, ratePerHour: number) {
-    const list = Array.isArray(dates) ? dates : [dates]
+  const handleAddEntry = useCallback(
+    (dates: string | string[], durationMinutes: number, ratePerHour: number) => {
+      const list = Array.isArray(dates) ? dates : [dates]
 
-    let successCount = 0
-    const errors: string[] = []
+      let successCount = 0
+      const errors: string[] = []
 
-    for (const d of list) {
-      try {
-        addEntry(d, durationMinutes, ratePerHour)
-        successCount += 1
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Erro ao adicionar registro.'
-        errors.push(`${d}: ${msg}`)
+      for (const d of list) {
+        try {
+          addEntry(d, durationMinutes, ratePerHour)
+          successCount += 1
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Erro ao adicionar registro.'
+          errors.push(`${d}: ${msg}`)
+        }
       }
-    }
 
-    if (successCount > 0) {
-      showToast(
-        successCount === 1 ? 'Registro adicionado à lista.' : `${successCount} registros adicionados à lista.`,
-        'success',
-      )
-    }
+      if (successCount > 0) {
+        showToast(
+          successCount === 1 ? 'Registro adicionado à lista.' : `${successCount} registros adicionados à lista.`,
+          'success',
+        )
+      }
 
-    if (errors.length > 0) {
-      throw new Error(errors.length === 1 ? errors[0] : `Algumas datas não foram adicionadas (${errors.length}).`)
-    }
-  }
+      if (errors.length > 0) {
+        throw new Error(errors.length === 1 ? errors[0] : `Algumas datas não foram adicionadas (${errors.length}).`)
+      }
+    },
+    [addEntry, showToast],
+  )
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     try {
       await saveAll()
       showToast('Registros salvos com sucesso!', 'success')
@@ -63,29 +70,43 @@ export function DashboardPage() {
       }
       showToast('Erro ao salvar registros.', 'error')
     }
-  }
+  }, [saveAll, showToast])
 
-  function handleAuthRequired() {
+  const handleAuthRequired = useCallback(() => {
     showToast('Faça login para salvar e exportar.', 'error')
-  }
+  }, [showToast])
 
-  async function handleDelete(id: string) {
+  const handleDelete = useCallback(async (id: string) => {
     try {
       await removeEntry(id)
       showToast('Registro removido.', 'info')
     } catch {
       showToast('Erro ao remover registro.', 'error')
     }
-  }
+  }, [removeEntry, showToast])
 
-  function handleEdit(id: string, data: { date: string; durationMinutes: number; hourlyRate: number }) {
-    try {
-      updateEntry(id, data)
-      showToast('Registro atualizado.', 'success')
-    } catch (err) {
-      if (err instanceof Error) showToast(err.message, 'error')
-      else showToast('Erro ao editar registro.', 'error')
-    }
+  const handleEdit = useCallback(
+    (id: string, data: { date: string; durationMinutes: number; hourlyRate: number }) => {
+      try {
+        updateEntry(id, data)
+        showToast('Registro atualizado.', 'success')
+      } catch (err) {
+        if (err instanceof Error) showToast(err.message, 'error')
+        else showToast('Erro ao editar registro.', 'error')
+      }
+    },
+    [updateEntry, showToast],
+  )
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex-1 flex flex-col">
+        <DashboardHeader />
+        <main className="w-full flex-1 flex items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-600 border-t-blue-400" />
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -94,7 +115,7 @@ export function DashboardPage() {
 
       <main
         className="w-full flex-1 pt-8 pb-24 flex justify-center"
-        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        style={mainStyle}
       >
         <div className="w-full max-w-3xl px-4 sm:px-6">
           <div className="flex flex-col gap-y-10">
@@ -161,3 +182,5 @@ export function DashboardPage() {
     </div>
   )
 }
+
+export default DashboardPage

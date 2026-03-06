@@ -5,7 +5,9 @@ import { ArrowLeft, Lock } from 'lucide-react'
 import { DashboardHeader } from '@/components/dashboard'
 import { SummaryCards, ActionButtons, PendingEntriesList } from '@/components/dashboard'
 import { Toast, Button } from '@/components/ui'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
+
+const mainStyle = { paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' } as const
 
 function getMonthBounds(year: number, month: number) {
   const start = new Date(year, month - 1, 1)
@@ -60,33 +62,36 @@ export function HistoryDetailsPage() {
 
   const monthLabel = useMemo(() => getMonthLabel(monthNum, yearNum), [monthNum, yearNum])
 
-  async function handleRemoveEntry(id: string) {
+  const handleRemoveEntry = useCallback(async (id: string) => {
     try {
       await removeEntry(id)
       showToast('Registro removido.', 'info')
     } catch {
       showToast('Erro ao remover registro.', 'error')
     }
-  }
+  }, [removeEntry, showToast])
 
-  async function handleEditEntry(
-    id: string,
-    data: { date: string; durationMinutes: number; hourlyRate: number },
-  ) {
-    try {
-      await editEntry(id, data)
-      showToast('Registro atualizado.', 'success')
-    } catch (err) {
-      if (err instanceof Error && err.message === 'AUTH_REQUIRED') {
-        showToast('Faça login para editar.', 'error')
-        return
+  const handleEditEntry = useCallback(
+    async (
+      id: string,
+      data: { date: string; durationMinutes: number; hourlyRate: number },
+    ) => {
+      try {
+        await editEntry(id, data)
+        showToast('Registro atualizado.', 'success')
+      } catch (err) {
+        if (err instanceof Error && err.message === 'AUTH_REQUIRED') {
+          showToast('Faça login para editar.', 'error')
+          return
+        }
+        showToast(err instanceof Error ? err.message : 'Erro ao editar registro.', 'error')
+        throw err
       }
-      showToast(err instanceof Error ? err.message : 'Erro ao editar registro.', 'error')
-      throw err
-    }
-  }
+    },
+    [editEntry, showToast],
+  )
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     try {
       await saveAll()
       showToast('Registros salvos com sucesso!', 'success')
@@ -97,11 +102,11 @@ export function HistoryDetailsPage() {
       }
       showToast('Erro ao salvar registros.', 'error')
     }
-  }
+  }, [saveAll, showToast])
 
-  function handleAuthRequired() {
+  const handleAuthRequired = useCallback(() => {
     showToast('Faça login para salvar e exportar.', 'error')
-  }
+  }, [showToast])
 
   if (!isAuthenticated) {
     return (
@@ -109,7 +114,7 @@ export function HistoryDetailsPage() {
         <DashboardHeader />
         <main
           className="w-full flex-1 pt-8 pb-24 flex justify-center"
-          style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+          style={mainStyle}
         >
           <div className="w-full max-w-3xl px-4 sm:px-6">
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -138,7 +143,7 @@ export function HistoryDetailsPage() {
 
       <main
         className="w-full flex-1 pt-8 pb-24 flex justify-center"
-        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        style={mainStyle}
       >
         <div className="w-full max-w-3xl px-4 sm:px-6">
           {/* Header */}

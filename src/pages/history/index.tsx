@@ -5,8 +5,10 @@ import { CalendarDays, ArrowLeft, Lock } from 'lucide-react'
 import { MonthCard } from '@/components/history'
 import { DashboardHeader } from '@/components/dashboard'
 import { Button } from '@/components/ui'
-import { useState } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { makeDeleteWorkEntryService, makeFetchWorkEntriesService } from '@/services/factories'
+
+const mainStyle = { paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' } as const
 
 export function HistoryPage() {
   const navigate = useNavigate()
@@ -14,36 +16,49 @@ export function HistoryPage() {
   const { history, isLoading, reload } = useMonthlyHistory()
   const [deletingKey, setDeletingKey] = useState<string | null>(null)
 
-  function handleMonthClick(month: number, year: number) {
-    navigate(`/history/${year}/${month}`)
-  }
+  const handleMonthClick = useCallback(
+    (month: number, year: number) => {
+      navigate(`/history/${year}/${month}`)
+    },
+    [navigate],
+  )
 
-  async function handleDeleteMonth(month: number, year: number) {
-    const key = `${year}-${month}`
-    if (deletingKey) return
+  const handleDeleteMonth = useCallback(
+    async (month: number, year: number) => {
+      const key = `${year}-${month}`
+      if (deletingKey) return
 
-    setDeletingKey(key)
-    try {
-      const fetchService = makeFetchWorkEntriesService()
-      const { entries } = await fetchService.execute()
+      setDeletingKey(key)
+      try {
+        const fetchService = makeFetchWorkEntriesService()
+        const { entries } = await fetchService.execute()
 
-      const ids = entries
-        .filter(e => {
-          const d = new Date(e.date)
-          return d.getFullYear() === year && d.getMonth() + 1 === month
-        })
-        .map(e => e.id)
+        const ids = entries
+          .filter(e => {
+            const d = new Date(e.date)
+            return d.getFullYear() === year && d.getMonth() + 1 === month
+          })
+          .map(e => e.id)
 
-      const deleteService = makeDeleteWorkEntryService()
-      for (const id of ids) {
-        await deleteService.execute(id)
+        const deleteService = makeDeleteWorkEntryService()
+        await Promise.all(ids.map(id => deleteService.execute(id)))
+
+        await reload()
+      } finally {
+        setDeletingKey(null)
       }
+    },
+    [deletingKey, reload],
+  )
 
-      await reload()
-    } finally {
-      setDeletingKey(null)
-    }
-  }
+  const sortedHistory = useMemo(
+    () =>
+      [...history].sort((a, b) => {
+        if (a.year !== b.year) return b.year - a.year
+        return b.month - a.month
+      }),
+    [history],
+  )
 
   if (!isAuthenticated) {
     return (
@@ -51,7 +66,7 @@ export function HistoryPage() {
         <DashboardHeader />
         <main
           className="w-full flex-1 pt-8 pb-24 flex justify-center"
-          style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+          style={mainStyle}
         >
           <div className="w-full max-w-3xl px-4 sm:px-6">
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -80,7 +95,7 @@ export function HistoryPage() {
 
       <main
         className="w-full flex-1 pt-8 pb-24 flex justify-center"
-        style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}
+        style={mainStyle}
       >
         <div className="w-full max-w-3xl px-4 sm:px-6">
           {/* Header */}
@@ -113,12 +128,7 @@ export function HistoryPage() {
             </div>
           ) : (
             <div className="!space-y-3">
-              {history
-                .sort((a, b) => {
-                  if (a.year !== b.year) return b.year - a.year
-                  return b.month - a.month
-                })
-                .map((item, index) => (
+              {sortedHistory.map((item, index) => (
                   <div
                     key={`${item.year}-${item.month}`}
                     className="animate-fade-in"
@@ -139,3 +149,5 @@ export function HistoryPage() {
     </div>
   )
 }
+
+export default HistoryPage

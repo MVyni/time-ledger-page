@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Clock, Coins } from 'lucide-react'
 
 interface SummaryCardsProps {
@@ -11,7 +12,7 @@ function formatHHMM(totalMinutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
-export function SummaryCards({ totalMinutes, totalEarnings }: SummaryCardsProps) {
+export const SummaryCards = memo(function SummaryCards({ totalMinutes, totalEarnings }: SummaryCardsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       {/* Horas Totais */}
@@ -37,4 +38,4 @@ export function SummaryCards({ totalMinutes, totalEarnings }: SummaryCardsProps)
       </div>
     </div>
   )
-}
+})
