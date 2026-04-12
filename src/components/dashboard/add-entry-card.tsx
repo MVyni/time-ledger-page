@@ -20,7 +20,6 @@ function makeYmd(year: number, monthIndex: number, day: number): string {
 
 export function AddEntryCard({ onAdd }: AddEntryCardProps) {
   const today = formatYmd(new Date())
-  const [date, setDate] = useState(today)
   const [hours, setHours] = useState('')
   const [rate, setRate] = useState('')
   const [error, setError] = useState('')
@@ -32,7 +31,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
   }, [])
   const [viewYear, setViewYear] = useState(initialView.year)
   const [viewMonth, setViewMonth] = useState(initialView.month) // 0-11
-  const [selectedDates, setSelectedDates] = useState<string[]>([])
+  const [selectedDates, setSelectedDates] = useState<string[]>([today])
 
   const selectedSet = useMemo(() => new Set(selectedDates), [selectedDates])
 
@@ -53,13 +52,17 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
     })
   }, [viewYear, viewMonth])
 
-  function toggleSelected(ymd: string) {
-    setSelectedDates(prev => {
-      const set = new Set(prev)
-      if (set.has(ymd)) set.delete(ymd)
-      else set.add(ymd)
-      return Array.from(set)
-    })
+  function handleDayClick(ymd: string) {
+    if (multiMode) {
+      setSelectedDates(prev => {
+        const set = new Set(prev)
+        if (set.has(ymd)) set.delete(ymd)
+        else set.add(ymd)
+        return Array.from(set)
+      })
+    } else {
+      setSelectedDates([ymd])
+    }
   }
 
   function goPrevMonth() {
@@ -116,12 +119,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
     const durationMinutes = parseHoursToMinutes(hours)
     const rateNum = parseFloat(rate)
 
-    if (!multiMode && !date) {
-      setError('Selecione uma data.')
-      return
-    }
-
-    if (multiMode && selectedDates.length === 0) {
+    if (selectedDates.length === 0) {
       setError('Selecione pelo menos um dia no calendário.')
       return
     }
@@ -137,7 +135,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
     }
 
     try {
-      const datesToAdd = multiMode ? selectedDates.slice().sort() : date
+      const datesToAdd = multiMode ? selectedDates.slice().sort() : selectedDates[0]!
       onAdd(datesToAdd, durationMinutes, rateNum)
       setHours('')
       setRate('')
@@ -179,10 +177,9 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
                 setMultiMode(v => {
                   const next = !v
                   if (next) {
-                    const base = date ? new Date(date) : new Date()
+                    const base = selectedDates.length ? new Date(selectedDates[0] + 'T00:00') : new Date()
                     setViewYear(base.getFullYear())
                     setViewMonth(base.getMonth())
-                    setSelectedDates(prev => (prev.length ? prev : [formatYmd(base)]))
                   }
                   return next
                 })
@@ -193,14 +190,6 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
             </button>
           </div>
 
-          {!multiMode ? (
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              className="h-12 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 [color-scheme:dark]"
-            />
-          ) : (
             <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-900 p-3">
               <div className="flex items-center justify-between">
                 <button
@@ -218,7 +207,9 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
                     {selectedDates.length > 0 ? (
                       <button
                         type="button"
-                        onClick={() => setSelectedDates([])}
+                        onClick={() => {
+                          setSelectedDates([])
+                        }}
                         className="!ml-4 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors"
                       >
                         Limpar
@@ -251,7 +242,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
                     <button
                       key={ymd}
                       type="button"
-                      onClick={() => toggleSelected(ymd)}
+                      onClick={() => handleDayClick(ymd)}
                       className={
                         `h-9 rounded-lg text-sm font-semibold transition-colors ` +
                         (isSelected
@@ -266,7 +257,6 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
                 })}
               </div>
             </div>
-          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -280,7 +270,6 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
             </label>
             <input
               type="text"
-              inputMode="numeric"
               placeholder="Ex: 9:00"
               value={hours}
               onChange={e => setHours(e.target.value)}
