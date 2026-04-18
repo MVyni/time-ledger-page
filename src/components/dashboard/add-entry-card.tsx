@@ -25,6 +25,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
   const [error, setError] = useState('')
 
   const [multiMode, setMultiMode] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
   const initialView = useMemo(() => {
     const d = new Date()
     return { year: d.getFullYear(), month: d.getMonth() }
@@ -62,8 +63,18 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
       })
     } else {
       setSelectedDates([ymd])
+      setCalendarOpen(false)
     }
   }
+
+  const dateDisplayText = useMemo(() => {
+    if (selectedDates.length === 0) return ''
+    if (selectedDates.length === 1) {
+      const [y, m, d] = selectedDates[0]!.split('-')
+      return `${d}/${m}/${y}`
+    }
+    return `${selectedDates.length} dias selecionados`
+  }, [selectedDates])
 
   function goPrevMonth() {
     setViewMonth(prev => {
@@ -183,6 +194,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
                   }
                   return next
                 })
+                setCalendarOpen(true)
               }}
               className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
             >
@@ -190,6 +202,21 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
             </button>
           </div>
 
+          <input
+            type="text"
+            readOnly
+            value={dateDisplayText}
+            placeholder="Selecione uma data"
+            onClick={() => {
+              setCalendarOpen(prev => !prev)
+              const base = selectedDates.length ? new Date(selectedDates[0] + 'T00:00') : new Date()
+              setViewYear(base.getFullYear())
+              setViewMonth(base.getMonth())
+            }}
+            className="h-12 w-full cursor-pointer rounded-xl border border-slate-700 bg-slate-800 px-4 text-base text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          />
+
+          {calendarOpen && (
             <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-900 p-3">
               <div className="flex items-center justify-between">
                 <button
@@ -257,6 +284,7 @@ export function AddEntryCard({ onAdd }: AddEntryCardProps) {
                 })}
               </div>
             </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
