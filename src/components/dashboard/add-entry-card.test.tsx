@@ -22,23 +22,30 @@ describe('AddEntryCard (unit)', () => {
     expect(screen.getByText('Adicionar')).toBeInTheDocument()
   })
 
-  it('should always show the custom calendar (not native date input)', () => {
+  it('should hide the calendar by default and show on date input click', () => {
     render(<AddEntryCard onAdd={onAdd} />)
 
     // Should NOT have a native date input
     const dateInputs = document.querySelectorAll('input[type="date"]')
     expect(dateInputs).toHaveLength(0)
 
-    // Should have the calendar grid with day headers (D, S, T, Q, Q, S, S)
-    expect(screen.getByText('D')).toBeInTheDocument()
-    expect(screen.getAllByText('T')).toHaveLength(1)
-    // Q and S appear multiple times due to day headers and other text
-    expect(screen.getAllByText('Q').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getAllByText('S').length).toBeGreaterThanOrEqual(2)
+    // Calendar should be hidden by default
+    expect(screen.queryByLabelText('Mês anterior')).not.toBeInTheDocument()
+
+    // Click the date input to open calendar
+    const dateInput = screen.getByPlaceholderText('Selecione uma data')
+    fireEvent.click(dateInput)
+
+    // Now calendar should be visible
+    expect(screen.getByLabelText('Mês anterior')).toBeInTheDocument()
+    expect(screen.getByLabelText('Próximo mês')).toBeInTheDocument()
   })
 
   it('should have today pre-selected in single mode', () => {
     render(<AddEntryCard onAdd={onAdd} />)
+
+    // Open calendar
+    fireEvent.click(screen.getByPlaceholderText('Selecione uma data'))
 
     const today = new Date().getDate()
     const todayButton = screen.getByRole('button', { name: String(today), pressed: true })
@@ -92,6 +99,9 @@ describe('AddEntryCard (unit)', () => {
 
   it('should show error when no date is selected after clearing', async () => {
     render(<AddEntryCard onAdd={onAdd} />)
+
+    // Open calendar first
+    fireEvent.click(screen.getByPlaceholderText('Selecione uma data'))
 
     // Clear selected dates
     const clearButton = screen.getByText('Limpar')
@@ -148,6 +158,9 @@ describe('AddEntryCard (unit)', () => {
 
   it('should navigate months with chevron buttons', () => {
     render(<AddEntryCard onAdd={onAdd} />)
+
+    // Open calendar first
+    fireEvent.click(screen.getByPlaceholderText('Selecione uma data'))
 
     const prevButton = screen.getByLabelText('Mês anterior')
     const nextButton = screen.getByLabelText('Próximo mês')
